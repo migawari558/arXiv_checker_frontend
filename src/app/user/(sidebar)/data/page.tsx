@@ -26,7 +26,7 @@ type Response = {
 
 export default async function Page() {
   const res: Response = (await getUser()) as Response;
-  const { username, categories } = res.data;
+  const { username, categories } = res.data || { username: "", categories: [] };
 
   if (res.err) {
     return (
