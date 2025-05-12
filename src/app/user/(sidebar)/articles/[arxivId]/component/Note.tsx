@@ -29,7 +29,7 @@ export function Note({ data }: { data: NoteData }) {
       .then(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [blockNote]);
 
   return (
     <Card.Root boxShadow="md" size="md" m={2}>
