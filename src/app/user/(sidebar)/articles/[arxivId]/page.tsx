@@ -3,8 +3,13 @@ import { getNote } from "./action/getNote";
 import { Note } from "./component/Note";
 import { Toaster } from "@/components/ui/toaster";
 
-export default async function SearchNote({ params }) {
-  const res = await getNote(params.arxivId);
+export default async function SearchNote({
+  params,
+}: {
+  params: Promise<{ arxivId: string }>;
+}) {
+  const { arxivId } = await params;
+  const res = await getNote(arxivId);
   if (res.err) {
     return (
       <Alert.Root status="error">
