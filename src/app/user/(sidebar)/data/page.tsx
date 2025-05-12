@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // SSRに
+
 import { Alert, Card, Heading, Separator, Stack } from "@chakra-ui/react";
 import { getUser } from "./action/getUser";
 import { ObjectId } from "mongoose";
@@ -26,9 +28,8 @@ type Response = {
 
 export default async function Page() {
   const res: Response = (await getUser()) as Response;
-  const { username, categories } = res.data || { username: "", categories: [] };
 
-  if (res.err) {
+  if (res.err || !res.data) {
     return (
       <Card.Root size="md" boxShadow="md">
         <Card.Header>
@@ -45,6 +46,8 @@ export default async function Page() {
       </Card.Root>
     );
   }
+
+  const { username, categories } = res.data;
 
   return (
     <>
