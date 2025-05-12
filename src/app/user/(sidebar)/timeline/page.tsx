@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // SSR
+
 import { Heading, Stack } from "@chakra-ui/react";
 import env from "dotenv";
 import "katex/dist/katex.min.css";
@@ -9,13 +11,13 @@ env.config();
 
 export default async function timelineComponent() {
   const res = await getArticles();
-  console.log(res.data, res.msg);
-  if (res.data.length === 0)
+  if (!res.data || res.data.length === 0) {
     return (
       <Heading size="lg" justifyContent="center" display="flex">
         新着論文はありません
       </Heading>
     );
+  }
   return (
     <>
       <Toaster />
