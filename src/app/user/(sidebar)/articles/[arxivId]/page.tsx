@@ -3,13 +3,7 @@ import { getNote } from "./action/getNote";
 import { Note } from "./component/Note";
 import { Toaster } from "@/components/ui/toaster";
 
-type Props = {
-  params: {
-    arxivId: string;
-  };
-};
-
-export default async function SearchNote({ params }: Props) {
+export default async function SearchNote({ params }) {
   const res = await getNote(params.arxivId);
   if (res.err) {
     return (
