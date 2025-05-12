@@ -31,7 +31,7 @@ export const addTag = async (tag: string, id: string) => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "タグを追加しました", err: false, data: res.data };
   } catch (err) {
@@ -79,13 +79,11 @@ export const deleteTag = async (tag: string, id: string) => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "タグを削除しました", err: false, data: res.data };
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      console.log(err.response);
-
       if (err.response?.status === 401) {
         redirect("/error/401");
       }

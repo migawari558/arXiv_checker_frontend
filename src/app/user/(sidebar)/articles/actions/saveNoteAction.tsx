@@ -29,7 +29,7 @@ export const saveNoteAction = async (note: string, id: string) => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "noteを更新しました", err: false };
   } catch (err) {
@@ -79,7 +79,7 @@ export const changeIsOpen = async (isOpen: boolean, id: string) => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return {
       msg: `ノートが${isOpen ? "公開" : "非公開"}になりました`,

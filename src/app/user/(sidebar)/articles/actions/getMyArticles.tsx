@@ -24,13 +24,11 @@ export const getMyArticle = async () => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "論文を追加しました", err: false, data: res.data };
   } catch (err) {
     if (axios.isAxiosError(err)) {
-      console.log(err.response);
-
       if (err.response?.status === 401) {
         redirect("/error/401");
       }

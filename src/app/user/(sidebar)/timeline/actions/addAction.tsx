@@ -27,13 +27,25 @@ export const addAction = async (arXivId: string) => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "論文を追加しました", err: false };
   } catch (err) {
-    if (err.response.status === 401) {
-      redirect("/error/401");
+    if (axios.isAxiosError(err)) {
+      if (err.response?.status === 401) {
+        redirect("/error/401");
+      }
+
+      return {
+        msg: err.response?.data?.msg ?? "予期せぬエラーが発生しました",
+        err: true,
+      };
     }
-    return { msg: err.response.data.msg, err: true };
+
+    // AxiosError でない場合の fallback
+    return {
+      msg: "不明なエラーが発生しました",
+      err: true,
+    };
   }
 };

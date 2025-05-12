@@ -32,16 +32,24 @@ export const changeUser = async (payload: Payload) => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "ユーザー情報が変更されました", err: false };
   } catch (err) {
-    if (err.response?.status === 401) {
-      redirect("/error/401");
+    if (axios.isAxiosError(err)) {
+      if (err.response?.status === 401) {
+        redirect("/error/401");
+      }
+
+      return {
+        msg: err.response?.data?.msg ?? "予期せぬエラーが発生しました",
+        err: true,
+      };
     }
 
+    // AxiosError でない場合の fallback
     return {
-      msg: err.response?.data?.msg ?? "予期せぬエラーが発生しました",
+      msg: "不明なエラーが発生しました",
       err: true,
     };
   }

@@ -25,13 +25,22 @@ export async function getNote(id: string) {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "ノートを取得しました", err: false, data: res.data };
   } catch (err) {
-    if (err.response.status === 401) {
-      redirect("/error/401");
+    if (axios.isAxiosError(err)) {
+      if (err.response?.status === 401) {
+        redirect("/error/401");
+      }
+      return { msg: err.response?.data.msg, err: true, data: undefined };
     }
-    return { msg: err.response.data.msg, err: true, data: undefined };
+
+    // AxiosError でない場合の fallback
+    return {
+      msg: "不明なエラーが発生しました",
+      err: true,
+      data: undefined,
+    };
   }
 }

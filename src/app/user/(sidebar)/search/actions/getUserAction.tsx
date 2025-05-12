@@ -24,7 +24,7 @@ export const getUser = async () => {
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "情報を取得", err: false, data: res.data };
   } catch (err) {

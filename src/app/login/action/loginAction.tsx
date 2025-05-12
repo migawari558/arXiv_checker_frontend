@@ -44,7 +44,7 @@ export const loginUser = async (
     );
 
     // cookieをクライアントに
-    await proxyServerCookies(res.headers);
+    await proxyServerCookies(res.headers as unknown as Headers);
 
     return { msg: "ログイン成功", err: false };
   } catch (err) {
