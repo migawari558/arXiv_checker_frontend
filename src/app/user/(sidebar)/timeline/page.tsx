@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic"; // SSR
-
 import { Heading, Stack } from "@chakra-ui/react";
 import env from "dotenv";
 import "katex/dist/katex.min.css";
@@ -8,6 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { PaperData } from "@/lib/features/articleSlice";
 import { getArticles } from "./actions/getArticles";
 env.config();
+
+export const revalidate = 60 * 60 * 5; // 5時間ごとに再検証する
 
 export default async function timelineComponent() {
   const res = await getArticles();

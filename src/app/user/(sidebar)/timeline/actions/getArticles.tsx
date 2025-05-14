@@ -1,6 +1,5 @@
 "use server";
 
-import axios from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -8,36 +7,49 @@ import { redirect } from "next/navigation";
 export const getArticles = async () => {
   try {
     // クライアントのクッキーを取得
-    const cookie = await cookies();
-    const cookieString = cookie.toString();
+    const cookieStore = cookies();
+    const cookieString = cookieStore.toString();
 
-    const res = await axios.get(
+    const response = await fetch(
       `${process.env.SERVER_PORT}/api/session/arXiv`,
       {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Cookie: cookieString, // クッキーをバックエンドに送りつける
+          // クッキーをバックエンドに送りつける
+          Cookie: cookieString,
         },
-        withCredentials: true, // Cookie を送受信
+        credentials: "include", // Cookie を送受信
+        next: { revalidate: 60 * 60 * 5 }, // 5時間で更新
       }
     );
 
-    return { msg: "get成功", err: false, data: res.data };
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      if (err.response?.status === 401) {
-        redirect("/error/401");
-      }
+    // ステータスコード別の処理
+    if (response.status === 401) {
+      // 認証エラーならリダイレクト
+      redirect("/error/401");
+    }
+    if (!response.ok) {
+      // その他の HTTP エラー
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(errorBody.msg || `HTTP Error ${response.status}`);
+    }
 
+    // 例: レスポンス全体を確認する
+    const json = await response.json();
+
+    return { msg: "get成功", err: false, data: json };
+  } catch (err: unknown) {
+    // TypeError は fetch のネットワークエラー等
+    if (err instanceof TypeError) {
       return {
-        msg: err.response?.data?.msg ?? "予期せぬエラーが発生しました",
+        msg: "ネットワークエラーが発生しました",
         err: true,
       };
     }
-
-    // AxiosError でない場合の fallback
+    // そのほかの例外
     return {
-      msg: "不明なエラーが発生しました",
+      msg: err instanceof Error ? err.message : "不明なエラーが発生しました",
       err: true,
     };
   }

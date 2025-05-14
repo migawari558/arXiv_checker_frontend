@@ -1,7 +1,6 @@
 "use server";
 
 import { proxyServerCookies } from "@/app/helper/proxy-server-coolies";
-import axios from "axios";
 import env from "dotenv";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -10,39 +9,58 @@ env.config();
 export const getMyArticle = async () => {
   try {
     // クライアントのクッキーを取得
-    const cookie = await cookies();
-    const cookieString = cookie.toString();
+    const cookieStore = await cookies();
+    const cookieString = cookieStore.toString();
 
-    const res = await axios.get(
+    // fetch で GET リクエスト
+    const response = await fetch(
       `${process.env.SERVER_PORT}/api/session/article`,
       {
+        method: "GET",
         headers: {
-          Cookie: cookieString, // クッキーをバックエンドに送りつける
+          // バックエンドへクッキーを送信
+          Cookie: cookieString,
         },
-        withCredentials: true, // Cookie を送受信
+        // クライアントとサーバ間で Cookie をやりとり
+        credentials: "include",
+        next: { revalidate: 30 }, // 30秒に１回取得できるように
       }
     );
 
-    // cookieをクライアントに
-    await proxyServerCookies(res.headers as unknown as Headers);
+    // ステータス別の処理
+    if (response.status === 401) {
+      // 認証エラーならリダイレクト
+      redirect("/error/401");
+    }
+    if (!response.ok) {
+      // その他の HTTP エラーをキャッチ
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(errorBody.msg || `HTTP Error ${response.status}`);
+    }
 
-    return { msg: "論文を追加しました", err: false, data: res.data };
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      if (err.response?.status === 401) {
-        redirect("/error/401");
-      }
+    // レスポンスヘッダーを proxy へ渡す
+    await proxyServerCookies(response.headers);
 
+    // JSON ボディを取得
+    const resJson = await response.json();
+
+    return {
+      msg: "論文を取得しました",
+      err: false,
+      data: resJson, // data フィールドの有無に応じて
+    };
+  } catch (err: unknown) {
+    // ネットワークエラーなど
+    if (err instanceof TypeError) {
       return {
-        msg: err.response?.data?.msg ?? "予期せぬエラーが発生しました",
+        msg: "ネットワークエラーが発生しました",
         err: true,
         data: undefined,
       };
     }
-
-    // AxiosError でない場合の fallback
+    // それ以外の例外
     return {
-      msg: "不明なエラーが発生しました",
+      msg: err instanceof Error ? err.message : "不明なエラーが発生しました",
       err: true,
       data: undefined,
     };
