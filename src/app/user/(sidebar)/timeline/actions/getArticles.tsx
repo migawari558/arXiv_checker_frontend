@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 export const getArticles = async () => {
   try {
     // クライアントのクッキーを取得
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const cookieString = cookieStore.toString();
 
     const response = await fetch(
