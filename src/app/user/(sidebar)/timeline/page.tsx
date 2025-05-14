@@ -7,7 +7,7 @@ import { PaperData } from "@/lib/features/articleSlice";
 import { getArticles } from "./actions/getArticles";
 env.config();
 
-export const revalidate = 60 * 60 * 5; // 5時間ごとに再検証する
+export const revalidate = 18000; // 5時間ごとに再検証する
 
 export default async function timelineComponent() {
   const res = await getArticles();

@@ -20,7 +20,7 @@ export const getArticles = async () => {
           Cookie: cookieString,
         },
         credentials: "include", // Cookie を送受信
-        next: { revalidate: 60 * 60 * 5 }, // 5時間で更新
+        next: { revalidate: 18000 }, // 5時間で更新
       }
     );
 

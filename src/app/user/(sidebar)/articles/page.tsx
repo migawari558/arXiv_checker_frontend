@@ -11,6 +11,8 @@ import {
 import { MyArticle } from "./component/MyArticle";
 import { Toaster } from "@/components/ui/toaster";
 
+export const revalidate = 30; // 30秒ごとに再検証する
+
 export default function MyArticles() {
   const dispatch = useAppDispatch();
   const { items, loading, error } = useAppSelector((state) => state.articles);
