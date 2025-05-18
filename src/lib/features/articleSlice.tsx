@@ -155,12 +155,12 @@ export const articleSlice = createSlice({
       .addCase(deleteArticle.pending, (state) => {
         state.error = null;
       })
-      // .addCase(deleteArticle.fulfilled, (state, action) => {
-      //   // stateの記事を削除
-      //   state.items = state.items.filter(
-      //     (i) => i.article._id.toString() !== action.payload.id
-      //   );
-      // })
+      .addCase(deleteArticle.fulfilled, (state, action) => {
+        // stateの記事を削除
+        state.items = state.items.filter(
+          (i) => i.article._id.toString() !== action.payload.id
+        );
+      })
       .addCase(deleteArticle.rejected, (state, action) => {
         state.error = action.error.message || "削除に失敗しました";
       });
