@@ -13,6 +13,7 @@ import {
   Flex,
   Tag,
   Tabs,
+  Button,
 } from "@chakra-ui/react";
 import { SiArxiv } from "react-icons/si";
 import { ImFilePdf } from "react-icons/im";
@@ -29,10 +30,11 @@ import { NewTagForm } from "./NewTagForm";
 import { Note } from "./Note";
 import {
   ArticleData,
+  deleteArticle,
   PaperData,
   removeTagLocal,
 } from "@/lib/features/articleSlice";
-import { useAppDispatch } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { ArticleCard } from "./ArticleComponents/ArticleCard";
 
 export type category = {
@@ -53,12 +55,13 @@ const useUnsavedChangesWarning = (shouldWarn: boolean) => {
 
 export const MyArticle = ({
   data,
-  index,
+  id,
 }: {
   data: { article: ArticleData; paper: PaperData };
-  index: number;
+  id: string;
 }) => {
   const dispatch = useAppDispatch();
+  const { error } = useAppSelector((state) => state.articles);
 
   // tagの管理
   const [isEdit, setIsEdit] = useState<boolean>(false);
@@ -68,6 +71,15 @@ export const MyArticle = ({
 
   // ページ更新を警告
   useUnsavedChangesWarning(isNoteChanged);
+
+  // Artilcleの削除
+  async function deleteHandler() {
+    await dispatch(deleteArticle({ id }));
+    toaster.create({
+      title: error ? error : "削除しました",
+      type: error ? "error" : "success",
+    });
+  }
 
   const { paper, article } = data;
   return (
@@ -180,7 +192,7 @@ export const MyArticle = ({
                                         type: res.err ? "error" : "success",
                                       });
                                       if (res.err) window.location.reload();
-                                      dispatch(removeTagLocal({ index, tag }));
+                                      dispatch(removeTagLocal({ id, tag }));
                                     }}
                                   />
                                 </Tag.EndElement>
@@ -209,11 +221,7 @@ export const MyArticle = ({
                       </Text>
                     </Flex>
 
-                    <NewTagForm
-                      isEdit={isEdit}
-                      setIsEdit={setIsEdit}
-                      index={index}
-                    />
+                    <NewTagForm isEdit={isEdit} setIsEdit={setIsEdit} id={id} />
                   </>
                 </Stack>
               </Dialog.Header>
@@ -240,7 +248,7 @@ export const MyArticle = ({
                     </Tabs.Content>
                     <Tabs.Content value="note" overflowY="auto">
                       <Note
-                        index={index}
+                        id={id}
                         setIsNoteChanged={setIsNoteChanged}
                         isNoteChanged={isNoteChanged}
                       />
@@ -248,6 +256,28 @@ export const MyArticle = ({
                   </Tabs.Root>
                 </Stack>
               </Dialog.Body>
+              <Dialog.Footer>
+                <Flex>
+                  <Button
+                    colorPalette="red"
+                    left="20px"
+                    bottom="20px"
+                    position="fixed"
+                    variant="surface"
+                    onClick={async (e) => {
+                      const confirm = window.confirm("本当に削除しますか？");
+                      if (!confirm) {
+                        e.preventDefault();
+                        return;
+                      }
+                      await deleteHandler();
+                      window.location.reload();
+                    }}
+                  >
+                    削除
+                  </Button>
+                </Flex>
+              </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>

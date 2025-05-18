@@ -4,24 +4,20 @@ import { HStack, Input, Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { addTag } from "../actions/tagAction";
 import { toaster } from "@/components/ui/toaster";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppDispatch } from "@/lib/hooks";
 import { SetStateAction, Dispatch } from "react";
 import { addTagLocal } from "@/lib/features/articleSlice";
 
 export const NewTagForm = ({
   setIsEdit,
   isEdit,
-  index,
+  id,
 }: {
   setIsEdit: Dispatch<SetStateAction<boolean>>;
   isEdit: boolean;
-  index: number;
+  id: string;
 }) => {
   const dispatch = useAppDispatch();
-  const { items } = useAppSelector((state) => state.articles);
-
-  const id: string = items[index].article._id.toString();
-
   const [newTag, setNewTag] = useState<string>("");
 
   return (
@@ -36,7 +32,7 @@ export const NewTagForm = ({
           });
           if (!res.err) {
             setIsEdit(false);
-            dispatch(addTagLocal({ index, tag: tag || "" }));
+            dispatch(addTagLocal({ id, tag: tag || "" }));
             setNewTag("");
           }
         }}

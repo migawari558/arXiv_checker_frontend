@@ -16,20 +16,19 @@ import { updateNote, toggleIsOpen } from "@/lib/features/articleSlice";
 import "../css/editor.css";
 
 export const Note = ({
-  index,
+  id,
   setIsNoteChanged,
   isNoteChanged,
 }: {
-  index: number;
+  id: string;
   setIsNoteChanged: Dispatch<SetStateAction<boolean>>;
   isNoteChanged: boolean;
 }) => {
   const dispatch = useAppDispatch();
   const { items, error } = useAppSelector((state) => state.articles);
-
-  const initContent: string = items[index].article.note;
-  const id: string = items[index].article._id.toString();
-  const arxivId: string = items[index].article.arXivId;
+  const thisArticle = items.find((i) => i.article._id.toString() === id);
+  const initContent: string = thisArticle?.article.note || "";
+  const arxivId: string = thisArticle?.article.arXivId || "notFound";
 
   // 現在のノート状況
   const [content, setContent] = useState<Block[] | undefined>(
@@ -73,20 +72,20 @@ export const Note = ({
 
   return (
     <>
-      <Switch.Root
-        checked={checked}
-        onCheckedChange={handleChange}
-        left="20px"
-        bottom="30px"
-        position="fixed"
-      >
-        <Switch.HiddenInput />
-        <Switch.Control>
-          <Switch.Thumb />
-        </Switch.Control>
-        <Switch.Label>ノートを公開する</Switch.Label>
-      </Switch.Root>
       <HStack position="fixed" bottom="20px" right="20px" zIndex="tooltip">
+        <Switch.Root
+          checked={checked}
+          onCheckedChange={handleChange}
+          right="280px"
+          bottom="30px"
+          position="fixed"
+        >
+          <Switch.HiddenInput />
+          <Switch.Control>
+            <Switch.Thumb />
+          </Switch.Control>
+          <Switch.Label>ノートを公開する</Switch.Label>
+        </Switch.Root>
         <Link
           href={`/user/articles/${arxivId}`}
           target="_blank"

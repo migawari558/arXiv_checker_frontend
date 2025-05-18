@@ -6,6 +6,7 @@ import {
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { Block } from "@blocknote/core";
 import { Types } from "mongoose";
+import { deleteArticleAction } from "@/app/user/(sidebar)/articles/actions/deleteArticle";
 
 export type ArticleData = {
   _id: Types.ObjectId;
@@ -73,24 +74,41 @@ export const updateNote = createAsyncThunk(
   }
 );
 
+export const deleteArticle = createAsyncThunk(
+  "articles/deleteNote",
+  async function ({ id }: { id: string }, thunkAPI) {
+    const res = await deleteArticleAction(id);
+    if (res.err) return thunkAPI.rejectWithValue(res.msg);
+    return { id };
+  }
+);
+
 export const articleSlice = createSlice({
   name: "articles",
   initialState,
   reducers: {
     addTagLocal: (
       state,
-      action: PayloadAction<{ index: number; tag: string }>
+      action: PayloadAction<{ id: string; tag: string }>
     ) => {
-      state.items[action.payload.index].article.tags.push(action.payload.tag);
+      const target = state.items.find(
+        (i) => i.article._id.toString() === action.payload.id
+      );
+      if (target) {
+        target.article.tags.push(action.payload.tag);
+      }
     },
     removeTagLocal: (
       state,
-      action: PayloadAction<{ index: number; tag: string }>
+      action: PayloadAction<{ id: string; tag: string }>
     ) => {
-      const list = state.items[action.payload.index].article.tags;
-      state.items[action.payload.index].article.tags = list.filter(
-        (t) => t !== action.payload.tag
+      const target = state.items.find(
+        (i) => i.article._id.toString() === action.payload.id
       );
+      if (target) {
+        const list = target?.article.tags;
+        target.article.tags = list.filter((t) => t !== action.payload.tag);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -133,6 +151,18 @@ export const articleSlice = createSlice({
       })
       .addCase(toggleIsOpen.rejected, (state, action) => {
         state.error = action.error.message || "公開設定の更新に失敗しました";
+      })
+      .addCase(deleteArticle.pending, (state) => {
+        state.error = null;
+      })
+      // .addCase(deleteArticle.fulfilled, (state, action) => {
+      //   // stateの記事を削除
+      //   state.items = state.items.filter(
+      //     (i) => i.article._id.toString() !== action.payload.id
+      //   );
+      // })
+      .addCase(deleteArticle.rejected, (state, action) => {
+        state.error = action.error.message || "削除に失敗しました";
       });
   },
 });

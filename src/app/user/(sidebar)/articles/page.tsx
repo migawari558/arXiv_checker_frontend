@@ -8,8 +8,9 @@ import {
   ArticleData,
   PaperData,
 } from "@/lib/features/articleSlice";
-import { MyArticle } from "./component/MyArticle";
 import { Toaster } from "@/components/ui/toaster";
+
+import { MyArticle } from "./component/MyArticle";
 
 export default function MyArticles() {
   const dispatch = useAppDispatch();
@@ -43,15 +44,13 @@ export default function MyArticles() {
     <>
       <Toaster />
       <SimpleGrid columns={{ base: 1, sm: 2, md: 2, lg: 3, xl: 4 }} gap={3}>
-        {items.map(
-          (data: { article: ArticleData; paper: PaperData }, index: number) => (
-            <MyArticle
-              key={data.article._id.toString()}
-              data={data}
-              index={index}
-            />
-          )
-        )}
+        {items.map((data: { article: ArticleData; paper: PaperData }) => (
+          <MyArticle
+            key={data.article._id.toString()}
+            data={data}
+            id={data.article._id.toString()}
+          />
+        ))}
       </SimpleGrid>
     </>
   );
