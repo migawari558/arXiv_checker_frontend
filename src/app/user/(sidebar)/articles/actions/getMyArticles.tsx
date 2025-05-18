@@ -23,7 +23,7 @@ export const getMyArticle = async () => {
         },
         // クライアントとサーバ間で Cookie をやりとり
         credentials: "include",
-        next: { revalidate: 30 }, // 30秒に１回取得できるように
+        next: { revalidate: 1 }, // 30秒に１回取得できるように
       }
     );
 
