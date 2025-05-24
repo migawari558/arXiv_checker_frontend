@@ -42,7 +42,7 @@ export function Description() {
       </Box>
       <Center p={50} mt={10}>
         <HStack gap={5}>
-          <Link href="/user/timeline">
+          <Link href="/login">
             <Button>Sign In</Button>
           </Link>
           <Link href="/signup">
