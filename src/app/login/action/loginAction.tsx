@@ -27,10 +27,15 @@ export const loginUser = async (
   };
 
   try {
+    console.time("Login Process"); // 処理時間計測開始
+
     // クライアントのクッキーを取得
+    console.time("Cookie Retrieval");
     const cookie = await cookies();
     const cookieString = cookie.toString();
+    console.timeEnd("Cookie Retrieval");
 
+    console.time("API Request");
     const res = await axios.post(
       `${process.env.SERVER_PORT}/api/auth/login`,
       payload,
@@ -42,9 +47,14 @@ export const loginUser = async (
         withCredentials: true, // Cookie を送受信
       }
     );
+    console.timeEnd("API Request");
 
+    console.time("Proxy Server Cookies");
     // cookieをクライアントに
     await proxyServerCookies(res.headers as unknown as Headers);
+    console.timeEnd("Proxy Server Cookies");
+
+    console.timeEnd("Login Process"); // 処理時間計測終了
 
     return { msg: "ログイン成功", err: false };
   } catch (err) {

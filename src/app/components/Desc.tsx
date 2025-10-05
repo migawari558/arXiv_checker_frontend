@@ -14,7 +14,7 @@ export function Description() {
   return (
     <Box position="relative">
       <Image src="/icon_pass.png" alt="icon" justifySelf="end" />
-      <Box position="absolute" alignSelf="end" transform="translate(0, -100%)">
+      <Box position="absolute" alignSelf="end">
         <Heading
           fontSize="3xl"
           fontWeight="bold"

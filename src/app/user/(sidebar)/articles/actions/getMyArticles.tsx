@@ -7,50 +7,18 @@ import { redirect } from "next/navigation";
 env.config();
 
 export const getMyArticle = async () => {
+  let response: Response; // response変数をtryの外で宣言
+
   try {
-    // クライアントのクッキーを取得
     const cookieStore = await cookies();
     const cookieString = cookieStore.toString();
-
-    // fetch で GET リクエスト
-    const response = await fetch(
-      `${process.env.SERVER_PORT}/api/session/article`,
-      {
-        method: "GET",
-        headers: {
-          // バックエンドへクッキーを送信
-          Cookie: cookieString,
-        },
-        // クライアントとサーバ間で Cookie をやりとり
-        credentials: "include",
-        next: { revalidate: 1 }, // 30秒に１回取得できるように
-      }
-    );
-
-    // ステータス別の処理
-    if (response.status === 401) {
-      // 認証エラーならリダイレクト
-      redirect("/error/401");
-    }
-    if (!response.ok) {
-      // その他の HTTP エラーをキャッチ
-      const errorBody = await response.json().catch(() => ({}));
-      throw new Error(errorBody.msg || `HTTP Error ${response.status}`);
-    }
-
-    // レスポンスヘッダーを proxy へ渡す
-    await proxyServerCookies(response.headers);
-
-    // JSON ボディを取得
-    const resJson = await response.json();
-
-    return {
-      msg: "論文を取得しました",
-      err: false,
-      data: resJson, // data フィールドの有無に応じて
-    };
+    response = await fetch(`${process.env.SERVER_PORT}/api/session/article`, {
+      method: "GET",
+      headers: { Cookie: cookieString },
+      credentials: "include",
+      next: { revalidate: 1 },
+    });
   } catch (err: unknown) {
-    // ネットワークエラーなど
     if (err instanceof TypeError) {
       return {
         msg: "ネットワークエラーが発生しました",
@@ -58,11 +26,32 @@ export const getMyArticle = async () => {
         data: undefined,
       };
     }
-    // それ以外の例外
     return {
-      msg: err instanceof Error ? err.message : "不明なエラーが発生しました",
+      msg: "不明なサーバーエラーが発生しました",
       err: true,
       data: undefined,
     };
   }
+
+  if (response.status === 401) {
+    redirect("/error/401");
+  }
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    return {
+      msg: errorBody.msg || `HTTP Error ${response.status}`,
+      err: true,
+      data: undefined,
+    };
+  }
+
+  await proxyServerCookies(response.headers);
+  const resJson = await response.json();
+
+  return {
+    msg: "論文を取得しました",
+    err: false,
+    data: resJson,
+  };
 };
