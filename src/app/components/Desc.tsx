@@ -9,8 +9,12 @@ import {
   Link,
   Button,
 } from "@chakra-ui/react";
+import { cookies } from "next/headers";
 
-export function Description() {
+export async function Description() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session");
+  const signInHref = sessionToken ? "/user/timeline" : "/login";
   return (
     <Box position="relative">
       <Image src="/icon_pass.png" alt="icon" justifySelf="end" />
@@ -42,7 +46,7 @@ export function Description() {
       </Box>
       <Center p={50} mt={10}>
         <HStack gap={5}>
-          <Link href="/login">
+          <Link href={signInHref}>
             <Button>Sign In</Button>
           </Link>
           <Link href="/signup">
@@ -104,7 +108,7 @@ export function Description() {
       </Box>
       <Center p={50} mt={10}>
         <HStack gap={5}>
-          <Link href="/login">
+          <Link href={signInHref}>
             <Button>Sign In</Button>
           </Link>
           <Link href="/signup">
